@@ -1,4 +1,4 @@
-module simple-api-load-tester
+module github.com/mikeboe/simple-api-load-tester
 
 go 1.22.1
 
