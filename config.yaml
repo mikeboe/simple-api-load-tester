@@ -1,0 +1,29 @@
+config:
+  requestsPerSecond: 20
+  durationInSeconds: 30
+  timescaleDBConn: "postgres://postgres:password@192.168.188.20:5433/postgres?sslmode=prefer" # Connection string for TimescaleDB
+  useStatisticalDistribution: false # Flag to switch between statistical distribution and random selection
+  headers:
+    Authorization: Bearer RC.5a88f24673efdf39d721a117e3b5bace6207be197ffac2474b971997afe5a233
+    Content-Type: "application/json"
+
+  
+
+endpoints:
+  - url: https://dev-api.rocketcrm.io/contacts/con_0dgy6LhsizdA3M_G
+    method: GET
+  - url: https://dev-api.rocketcrm.io/contacts/con_0Nx9-uwRcLAqma62
+    method: GET
+  - url: https://dev-api.rocketcrm.io/contacts/con_18iU5cTLSkQEsNIs
+    method: GET
+  - url: https://dev-api.rocketcrm.io/customers/cus_ATVcoc9c0qAD4_du
+    method: GET
+  - url: https://dev-meetings.rocketcrm.io/mtn_xz1Ago_211tUIl5r
+    method: GET
+  - url: https://dev-api.rocketcrm.io/contacts?page=1&perPage=25&sort=name&order=asc
+    method: GET
+  - url: https://dev-api.rocketcrm.io/contacts?page=3&perPage=100&sort=company&order=desc
+    method: GET
+  - url: https://dev-api.rocketcrm.io/contacts?page=1&perPage=100&sort=lead_stage&order=asc
+    method: GET
+  

@@ -1,0 +1,49 @@
+func min(times []time.Duration) time.Duration {
+	min := times[0]
+	for _, t := range times {
+		if t < min {
+			min = t
+		}
+	}
+	return min
+}
+
+func max(times []time.Duration) time.Duration {
+	max := times[0]
+	for _, t := range times {
+		if t > max {
+			max = t
+		}
+	}
+	return max
+}
+
+func (m *Metrics) printSummary(actualDuration time.Duration) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	avgResponseTime := m.totalTime / time.Duration(m.totalRequests)
+	actualRequestsPerSecond := float64(m.totalRequests) / actualDuration.Seconds()
+	fmt.Printf("Test ID: %s\n", m.testID)
+	fmt.Printf("--------------------\n")
+	fmt.Printf("Total Requests: %d\n", m.totalRequests)
+	fmt.Printf("--------------------\n")
+	fmt.Printf("Successful Requests: %d\n", m.successfulReqs)
+	fmt.Printf("Success Rate: %.2f%%\n", float64(m.successfulReqs)/float64(m.totalRequests)*100)
+	fmt.Printf("--------------------\n")
+	fmt.Printf("Failed Requests: %d\n", m.failedReqs)
+	fmt.Printf("Failure Rate: %.2f%%\n", float64(m.failedReqs)/float64(m.totalRequests)*100)
+	fmt.Printf("--------------------\n")
+	fmt.Printf("Average Response Time: %s\n", avgResponseTime)
+	fmt.Printf("Min Response Time: %s\n", min(m.responseTimes))
+	fmt.Printf("Max Response Time: %s\n", max(m.responseTimes))
+	fmt.Printf("--------------------\n")
+	fmt.Printf("Actual Requests Per Second: %.2f\n", actualRequestsPerSecond)
+	fmt.Printf("--------------------\n")
+	fmt.Println("Endpoint Statistics:")
+
+	for key, stats := range m.endpointStats {
+		avgTime := stats.totalTime / time.Duration(stats.count)
+		fmt.Printf("Endpoint: %s - Count: %d - Average Response Time: %s\n", key, stats.count, avgTime)
+		fmt.Printf("--------------------------------------------------\n")
+	}
+}
