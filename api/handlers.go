@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	loadTest "github.com/mikeboe/simple-api-load-tester/loadTest"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -15,8 +17,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type LoadTestConfig struct {
-	Config    Config     `json:"config"`
-	Endpoints []Endpoint `json:"endpoints"`
+	Config    loadTest.Config     `json:"config"`
+	Endpoints []loadTest.Endpoint `json:"endpoints"`
 }
 
 func loadTestHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,20 +40,8 @@ func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 		// Print the received message for debugging
 		fmt.Printf("Received message: %+v\n", msg)
 
-		// Trigger the load test
-		/* 		go func() {
-			// Run the loadTest binary with the provided config and endpoints
-			cmd := exec.Command("./loadTest", "--config", "config.yaml") // Adapt this command as needed
-			cmd.Stdout = conn.UnderlyingConn()
-			cmd.Stderr = conn.UnderlyingConn()
-			err := cmd.Run()
-			if err != nil {
-				fmt.Fprintf(conn.UnderlyingConn(), "Error running load test: %v\n", err)
-			}
-		}() */
-
-		// run load test from loadTest folder
-		StartLoadTest(msg.Config, msg.Endpoints)
+		// run load test
+		loadTest.StartLoadTest(msg.Config, msg.Endpoints, conn)
 
 		response := map[string]string{"status": "Load test started"}
 		conn.WriteJSON(response)

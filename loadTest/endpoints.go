@@ -1,4 +1,4 @@
-package loadTest
+package main
 
 import (
 	"math/rand"

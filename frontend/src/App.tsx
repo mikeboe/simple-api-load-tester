@@ -10,7 +10,7 @@ const App = () => {
     const message = {
       config: {
         RequestsPerSecond: 10, // Example value
-        DurationInSeconds: 60, // Example value
+        DurationInSeconds: 3, // Example value
         UseStatisticalDistribution: true,
       },
       endpoints: [

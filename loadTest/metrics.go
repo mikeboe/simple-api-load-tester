@@ -1,4 +1,4 @@
-package loadTest
+package main
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -28,6 +29,7 @@ type Metrics struct {
 	db                *pgxpool.Pool
 	TestID            uuid.UUID
 	StartTime         time.Time
+	// conn              *websocket.Conn
 }
 
 func NewMetrics(db *pgxpool.Pool, testID uuid.UUID) *Metrics {
@@ -40,7 +42,37 @@ func NewMetrics(db *pgxpool.Pool, testID uuid.UUID) *Metrics {
 	}
 }
 
-func (m *Metrics) LogRequest(startTime time.Time, duration time.Duration, success bool, endpoint Endpoint, statusCode int, responseMessage string) {
+/* func NewConn(conn *websocket.Conn) *Metrics {
+	return &Metrics{
+		conn: conn,
+	}
+} */
+
+func (m *Metrics) SendMetrics(testID uuid.UUID, timestamp time.Time, method, url string, responseTime int64, statusCode int, responseMessage string, conn *websocket.Conn) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	message := map[string]interface{}{
+		"test_id":          testID,
+		"timestamp":        timestamp,
+		"method":           method,
+		"url":              url,
+		"response_time_ms": responseTime,
+		"status_code":      statusCode,
+		"response_message": responseMessage,
+	}
+
+	log.Println(message)
+	if conn != nil {
+		fmt.Println("Sending metrics to client")
+		err := conn.WriteJSON(message)
+		if err != nil {
+			log.Printf("Error writing to WebSocket: %v\n", err)
+		}
+	}
+}
+
+func (m *Metrics) LogRequest(startTime time.Time, duration time.Duration, success bool, endpoint Endpoint, statusCode int, responseMessage string, conn *websocket.Conn) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -64,14 +96,21 @@ func (m *Metrics) LogRequest(startTime time.Time, duration time.Duration, succes
 	m.EndpointStats[key].Count++
 	m.EndpointStats[key].TotalTime += duration
 
+	time := time.Now()
+
 	// Write to TimescaleDB
 	_, err := m.db.Exec(context.Background(), `
 		INSERT INTO api_logs (test_id, timestamp, method, url, response_time_ms, status_code, response_message)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		m.TestID, time.Now(), endpoint.Method, endpoint.URL, duration.Milliseconds(), statusCode, responseMessage,
+		m.TestID, time, endpoint.Method, endpoint.URL, duration.Milliseconds(), statusCode, responseMessage,
 	)
 	if err != nil {
 		log.Printf("Error writing to TimescaleDB: %v", err)
+	}
+
+	// Send metrics to the client
+	if conn != nil {
+		m.SendMetrics(m.TestID, time, endpoint.Method, endpoint.URL, duration.Milliseconds(), statusCode, responseMessage, conn)
 	}
 }
 

@@ -1,4 +1,4 @@
-package loadTest
+package main
 
 import (
 	"context"
@@ -12,11 +12,23 @@ import (
 
 	"github.com/go-co-op/gocron"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 )
 
-func StartLoadTest(config Config, endpoints []Endpoint) {
+func logMessage(conn *websocket.Conn, message string) {
+	// log.Println(message)
+	fmt.Println(message)
+	if conn != nil {
+		err := conn.WriteJSON(message)
+		if err != nil {
+			log.Printf("Error writing to WebSocket: %v\n", err)
+		}
+	}
+}
+
+func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	client := &http.Client{}
 	var wg sync.WaitGroup
 
@@ -41,6 +53,9 @@ func StartLoadTest(config Config, endpoints []Endpoint) {
 
 	totalRequests := config.RequestsPerSecond * config.DurationInSeconds
 
+	// Send requests
+	fmt.Printf("Starting load test with %d requests per second for %d seconds...\n", config.RequestsPerSecond, config.DurationInSeconds)
+
 	for i := 0; i < totalRequests; i++ {
 		wg.Add(1)
 		var endpoint Endpoint
@@ -49,7 +64,8 @@ func StartLoadTest(config Config, endpoints []Endpoint) {
 		} else {
 			endpoint = GetRandomEndpoint(endpoints)
 		}
-		go SendRequest(client, config, endpoint, metrics, &wg)
+		go SendRequest(client, config, endpoint, metrics, &wg, conn)
+		logMessage(conn, fmt.Sprintf("Sending request %d to %s", i+1, endpoint.URL))
 		<-ticker.C
 	}
 
@@ -83,7 +99,7 @@ func ScheduleLoadTest(config Config, endpoints []Endpoint) {
 }
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}

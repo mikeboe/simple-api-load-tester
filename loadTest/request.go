@@ -1,4 +1,4 @@
-package loadTest
+package main
 
 import (
 	"bytes"
@@ -8,9 +8,11 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
-func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics *Metrics, wg *sync.WaitGroup) {
+func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics *Metrics, wg *sync.WaitGroup, conn *websocket.Conn) {
 	defer wg.Done()
 	start := time.Now()
 
@@ -62,5 +64,6 @@ func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics 
 			success = true
 		}
 	}
-	metrics.LogRequest(start, duration, success, endpoint, statusCode, responseMessage)
+	metrics.LogRequest(start, duration, success, endpoint, statusCode, responseMessage, conn)
+
 }

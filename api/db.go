@@ -11,7 +11,12 @@ import (
 var db *sql.DB
 
 func initDB() {
+
 	connStr := os.Getenv("DB_STRING")
+	if connStr == "" {
+		log.Fatalf("DB_STRING environment variable not set.")
+	}
+
 	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
