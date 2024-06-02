@@ -51,7 +51,7 @@ func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 		}() */
 
 		// run load test from loadTest folder
-		ScheduleLoadTest(msg.Config, msg.Endpoints)
+		StartLoadTest(msg.Config, msg.Endpoints)
 
 		response := map[string]string{"status": "Load test started"}
 		conn.WriteJSON(response)
