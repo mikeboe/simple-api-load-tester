@@ -3,6 +3,7 @@ version: '3.8'
 services:
   db:
     image: timescale/timescaledb:latest-pg15
+    container_name: db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -15,6 +16,7 @@ services:
 
   api:
     image: ghcr.io/mikeboe/simple-api-load-tester-api:latest
+    container_name: api
     build:
       dockerfile: Dockerfile.api
     environment:
@@ -37,6 +39,7 @@ services:
 
   frontend:
     image: ghcr.io/mikeboe/simple-api-load-tester-frontend:latest
+    container_name: frontend
     build:
       dockerfile: Dockerfile.frontend
     ports:
