@@ -182,7 +182,7 @@ func (m *Metrics) PrintSummary(actualDuration time.Duration, conn *websocket.Con
 	fmt.Printf("--------------------\n")
 	fmt.Println("Endpoint Statistics:")
 
-	// Print requests per second
+	// Print requests per second and endpoint stats
 	fmt.Println("Requests Per Second:")
 	for second, count := range m.RequestsPerSecond {
 		fmt.Printf("Second %d: %d requests\n", second, count)

@@ -57,7 +57,7 @@ jobs:
       
       - name: Publish Docker to GHCR.IO
         run: |
-          docker build -t frontend -f Dockerfile .
+          docker build -t frontend -f Dockerfile.frontend .
           docker tag frontend ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest
           docker push ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest
           docker tag ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:${{ steps.release.outputs.date }}
