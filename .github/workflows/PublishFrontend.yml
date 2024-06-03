@@ -1,4 +1,5 @@
 name: Publish Frontend Docker
+on:
   push:
     paths:
       - frontend/**
@@ -56,7 +57,7 @@ jobs:
       
       - name: Publish Docker to GHCR.IO
         run: |
-          docker build -t frontend -f Dockerfile.frontend .
+          docker build -t frontend -f Dockerfile .
           docker tag frontend ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest
           docker push ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest
           docker tag ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:latest ${{ env.REGISTRY }}/mikeboe/simple-api-load-tester-frontend:${{ steps.release.outputs.date }}

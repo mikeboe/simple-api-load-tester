@@ -14,8 +14,9 @@ services:
       - "5432:5432"
 
   api:
-    image: api
-    build: .
+    image: ghcr.io/mikeboe/simple-api-load-tester-api:latest
+    build:
+      dockerfile: Dockerfile.api
     environment:
       - DB_STRING=postgres://postgres:password@db:5432/postgres
     depends_on:
@@ -35,7 +36,9 @@ services:
   #     - API_PORT=8000
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/mikeboe/simple-api-load-tester-frontend:latest
+    build:
+      dockerfile: Dockerfile.frontend
     ports:
       - "3000:80"
     depends_on:
