@@ -4,7 +4,7 @@ export function setTestStore() {
     return {
         config: {
             UseStatisticalDistribution: true,
-            testID: nanoid(8),
+            testID: nanoid(10),
         },
         headers: [] as { key: string; value: string; id: string }[],
         endpoints: [] as { Method: string; URL: string; id: string }[],
