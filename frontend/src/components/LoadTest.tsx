@@ -30,6 +30,7 @@ const LoadTest = () => {
         }[];
     }
 
+
     const { config, headers, endpoints }: URLProps = qs.parse(window.location.search, { ignoreQueryPrefix: true }) as URLProps;
 
     // headers as an object
