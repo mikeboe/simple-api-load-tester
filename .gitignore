@@ -1,0 +1,30 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.prof
+*.pprof
+*.trace
+*.test
+*.test.out
+*.test.prof
+*.test.pprof
+*.test.trace
+/vendor/
+/Godeps/
+/.gogradle/
+/.idea/
+/.vscode/
+/.testify_cache/
+
+# TypeScript
+node_modules/
+dist/
+*.js
+*.js.map
+*.d.ts
+*.tsbuildinfo
