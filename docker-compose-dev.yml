@@ -14,7 +14,8 @@ services:
       - "5432:5432"
 
   api:
-    image: ghcr.io/mikeboe/
+    image: api
+    build: .
     environment:
       - DB_STRING=postgres://postgres:password@db:5432/postgres
     depends_on:

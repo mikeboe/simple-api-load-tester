@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
@@ -33,9 +32,8 @@ func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	defer dbpool.Close()
 
 	// Generate a unique test ID for this run
-	testID := uuid.New()
 
-	metrics := NewMetrics(dbpool, testID)
+	metrics := NewMetrics(dbpool, config.TestID)
 
 	ticker := time.NewTicker(time.Second / time.Duration(config.RequestsPerSecond))
 	defer ticker.Stop()
@@ -61,7 +59,7 @@ func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	wg.Wait()
 	actualDuration := time.Since(metrics.StartTime)
 	fmt.Println("Load test completed.")
-	metrics.PrintSummary(actualDuration)
+	metrics.PrintSummary(actualDuration, conn)
 }
 
 func ScheduleLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {

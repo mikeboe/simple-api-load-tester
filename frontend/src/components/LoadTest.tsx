@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import useWebSocket from "react-use-websocket";
 import { PrimaryButton, SecondaryButton } from "./ui/Buttons";
 import qs from 'qs';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Chart from "./chart/Chart";
 
-const socketUrl = "ws://localhost:8000/loadTest";
+const socketUrl = "ws://localhost:8000/";
 
 const LoadTest = () => {
+
+    const params = useParams();
 
     const navigate = useNavigate();
 
@@ -38,7 +40,7 @@ const LoadTest = () => {
         return acc;
     }, {} as { [key: string]: string });
 
-    const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+    const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl + params.id);
 
     const [messages, setMessages] = useState<{ endpoint: string; counter: number; duration: number }[]>([]);
     const [chartData, setChartData] = useState<any[]>([]);
@@ -120,7 +122,9 @@ const LoadTest = () => {
             <header>
                 <div className="mx-auto max-w-7xl my-10">
                     <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Run API Load Test</h1>
+                    <p className="text-lg text-gray-600">Test ID: {params.id}</p>
                 </div>
+
             </header>
             <div>
                 <SecondaryButton label="Back" onClick={() => navigate("/")} />

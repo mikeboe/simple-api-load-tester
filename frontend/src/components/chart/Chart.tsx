@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 interface ChartProps {
     data?: any[];
@@ -19,13 +19,15 @@ const Chart = ({ data }: ChartProps) => {
 
 
     return (
-        <LineChart width={800} height={300} data={data}>
+        <ResponsiveContainer width="100%" height={300}>
+            <LineChart width={800} height={300} data={data}>
 
-            <Line type="monotone" dataKey="response_time_ms" stroke="#8884d8" />
+                <Line type="monotone" dataKey="response_time_ms" stroke="#8884d8" />
 
-            <XAxis />
-            <YAxis />
-        </LineChart>
+                <XAxis />
+                <YAxis />
+            </LineChart>
+        </ResponsiveContainer>
     )
 };
 

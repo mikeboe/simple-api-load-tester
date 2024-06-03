@@ -6,6 +6,7 @@ import (
 
 	loadTest "simple-api-load-tester/loadTest"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -29,6 +30,10 @@ func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	// Extract test ID from URL
+	vars := mux.Vars(r)
+	testID := vars["id"]
+
 	for {
 		var msg LoadTestConfig
 		err := conn.ReadJSON(&msg)
@@ -39,6 +44,11 @@ func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Print the received message for debugging
 		fmt.Printf("Received message: %+v\n", msg)
+
+		// Add the test ID to the config or use it as needed
+		msg.Config.TestID = testID
+
+		conn.WriteJSON(map[string]string{"status": "Starting load test with " + testID})
 
 		// run load test
 		loadTest.StartLoadTest(msg.Config, msg.Endpoints, conn)

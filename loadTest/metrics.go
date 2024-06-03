@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -27,12 +26,12 @@ type Metrics struct {
 	EndpointStats     map[string]*EndpointStats
 	RequestsPerSecond map[int]int
 	db                *pgxpool.Pool
-	TestID            uuid.UUID
+	TestID            string
 	StartTime         time.Time
 	// conn              *websocket.Conn
 }
 
-func NewMetrics(db *pgxpool.Pool, testID uuid.UUID) *Metrics {
+func NewMetrics(db *pgxpool.Pool, testID string) *Metrics {
 	return &Metrics{
 		db:                db,
 		TestID:            testID,
@@ -48,7 +47,7 @@ func NewMetrics(db *pgxpool.Pool, testID uuid.UUID) *Metrics {
 	}
 } */
 
-func SendMetrics(testID uuid.UUID, timestamp time.Time, method, url string, responseTime int64, statusCode int, responseMessage string, conn *websocket.Conn) {
+func SendMetrics(testID string, timestamp time.Time, method, url string, responseTime int64, statusCode int, responseMessage string, conn *websocket.Conn) {
 
 	message := map[string]interface{}{
 		"test_id":          testID,
@@ -63,6 +62,33 @@ func SendMetrics(testID uuid.UUID, timestamp time.Time, method, url string, resp
 	// log.Println(message)
 	if conn != nil {
 		fmt.Println("Sending metrics to client")
+		err := conn.WriteJSON(message)
+		if err != nil {
+			log.Printf("Error writing to WebSocket: %v\n", err)
+		}
+	}
+}
+
+func SendReport(testID string, conn *websocket.Conn, totalRequests, successfulReqs, failedReqs int, avgResponseTime, minResponseTime, maxResponseTime time.Duration, actualRequestsPerSecond float64, requestsPerSecond map[int]int, endpointStats map[string]*EndpointStats) {
+	message := map[string]interface{}{
+		"test_id": testID,
+		"status":  "Load test completed",
+		"metrics": map[string]interface{}{
+			"total_requests":          totalRequests,
+			"successful_requests":     successfulReqs,
+			"failed_requests":         failedReqs,
+			"success_rate":            float64(successfulReqs) / float64(totalRequests) * 100,
+			"failure_rate":            float64(failedReqs) / float64(totalRequests) * 100,
+			"average_response_time":   avgResponseTime,
+			"min_response_time":       minResponseTime,
+			"max_response_time":       maxResponseTime,
+			"actual_requests_per_sec": actualRequestsPerSecond,
+			"requests_per_second":     requestsPerSecond,
+			"endpoint_stats":          endpointStats,
+		},
+	}
+
+	if conn != nil {
 		err := conn.WriteJSON(message)
 		if err != nil {
 			log.Printf("Error writing to WebSocket: %v\n", err)
@@ -133,7 +159,7 @@ func max(times []time.Duration) time.Duration {
 	return max
 }
 
-func (m *Metrics) PrintSummary(actualDuration time.Duration) {
+func (m *Metrics) PrintSummary(actualDuration time.Duration, conn *websocket.Conn) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	avgResponseTime := m.TotalTime / time.Duration(m.TotalRequests)
@@ -167,4 +193,10 @@ func (m *Metrics) PrintSummary(actualDuration time.Duration) {
 		avgTime := stats.TotalTime / time.Duration(stats.Count)
 		fmt.Printf("Endpoint: %s - Count: %d - Average Response Time: %s\n", key, stats.Count, avgTime)
 	}
+
+	// Send report to the client
+	if conn != nil {
+		SendReport(m.TestID, conn, m.TotalRequests, m.SuccessfulReqs, m.FailedReqs, avgResponseTime, min(m.ResponseTimes), max(m.ResponseTimes), actualRequestsPerSecond, m.RequestsPerSecond, m.EndpointStats)
+	}
+
 }

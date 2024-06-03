@@ -22,7 +22,7 @@ const CreateLoadTest = observer(() => {
         const queryString = qs.stringify(data);
         console.log('Query string:', queryString);
         // send data to server
-        navigate('/load-test' + '?' + queryString);
+        navigate('/' + testStore.config.testID + '?' + queryString);
     }
 
 

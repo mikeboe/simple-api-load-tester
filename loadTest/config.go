@@ -22,6 +22,7 @@ type Config struct {
 	Headers                    map[string]string `yaml:"headers"`
 	UseStatisticalDistribution bool              `yaml:"useStatisticalDistribution"`
 	BaseUrl                    string            `yaml:"baseURL"`
+	TestID                     string            `yaml:"testID"`
 }
 
 type ConfigFile struct {

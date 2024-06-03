@@ -1,0 +1,110 @@
+import React, { useState, useEffect } from "react";
+import useWebSocket from "react-use-websocket";
+
+const socketUrl = "ws://localhost:8000/loadTest";  // Update the URL if necessary
+
+const App = () => {
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+
+  const [messages, setMessages] = useState([]);
+
+  const handleClickSendMessage = () => {
+    const message = {
+      config: {
+        RequestsPerSecond: 10, // Example value
+        DurationInSeconds: 3, // Example value
+        UseStatisticalDistribution: true,
+        BaseUrl: "https://dev-api.rocketcrm.ios",
+        Headers: {
+          "Authorization": "Bearer RC.5a88f24673efdf39d721a117e3b5bace6207be197ffac2474b971997afe5a233",
+          "Content-Type": "application/json",
+        },
+      },
+      endpoints: [
+        {
+          URL: "/contacts/con_0dgy6LhsizdA3M_G",
+          Method: "GET",
+        }, {
+          URL: "/contacts/con_0Nx9-uwRcLAqma62",
+          Method: "GET",
+        }, {
+          URL: "/contacts/con_18iU5cTLSkQEsNIs",
+          Method: "GET",
+        }, {
+          URL: "/customers/cus_ATVcoc9c0qAD4_du",
+          Method: "GET",
+        }, {
+          URL: "/contacts?page=1&perPage=25&sort=name&order=asc",
+          Method: "GET",
+        }, {
+          URL: "/contacts?page=3&perPage=100&sort=company&order=desc",
+          Method: "GET",
+        }
+      ]
+
+    };
+    sendMessage(JSON.stringify(message));
+  };
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      const data = JSON.parse(lastMessage.data);
+      handleMessage(data);
+      console.log(data)
+    }
+  }, [lastMessage]);
+
+  const calcAverage = (c, avg, last) => {
+
+    return ((avg * (c - 1) + last) / c).toFixed(2);
+  }
+
+  const handleMessage = (message) => {
+    if (!message.url) {
+      return;
+    }
+
+
+    const index = messages.findIndex((m) => m.endpoint === message.url);
+    if (index === -1) {
+      setMessages([...messages, { endpoint: message.url, counter: 1, duration: message.response_time_ms }]);
+    } else {
+      const updatedMessages = [...messages];
+      updatedMessages[index].counter += 1;
+      updatedMessages[index].duration = calcAverage(updatedMessages[index].counter, updatedMessages[index].duration, message.response_time_ms);
+      setMessages(updatedMessages);
+
+    }
+
+  }
+
+  console.log(messages)
+
+
+  return (
+    <div>
+      <button onClick={handleClickSendMessage}>Send Message</button>
+      {lastMessage ? <p>Last message: {lastMessage.data}</p> : <p>No messages yet</p>}
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>Counter</th>
+          </tr>
+        </thead>
+        <tbody>
+          {messages.map((message, index) => (
+            <tr key={index}>
+              <td>{message.endpoint}</td>
+              <td>{message.counter}</td>
+              <td>{message.duration} ms</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p>Ready state: {readyState}</p>
+    </div>
+  );
+};
+
+export default App;
