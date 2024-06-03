@@ -10,6 +10,9 @@ func GetRandomEndpoint(endpoints []Endpoint) Endpoint {
 	return endpoints[rand.Intn(len(endpoints))]
 }
 
+// GetStatisticalEndpoint returns a random endpoint from the given list of endpoints,
+// with a bias towards the middle of the list.
+// The spread of the bias is controlled by adjusting the sigma value.
 func GetStatisticalEndpoint(endpoints []Endpoint) Endpoint {
 	norm := distuv.Normal{
 		Mu:    float64(len(endpoints)-1) / 2,

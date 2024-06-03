@@ -1,5 +1,6 @@
 package main
 
+// Config represents the configuration for load testing.
 type Config struct {
 	ID                         int    `json:"id"`
 	RequestsPerSecond          int    `json:"requestsPerSecond"`
@@ -8,6 +9,7 @@ type Config struct {
 	CronSchedule               string `json:"cronSchedule"`
 }
 
+// Endpoint represents an API endpoint.
 type Endpoint struct {
 	URL    string                 `json:"url"`
 	Method string                 `json:"method"`

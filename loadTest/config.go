@@ -30,6 +30,10 @@ type ConfigFile struct {
 	Endpoints []Endpoint `yaml:"endpoints"`
 }
 
+// LoadConfigFromYAML loads the configuration and endpoints from a YAML file.
+// It takes the filename as input and returns the loaded configuration and endpoints.
+// If there is an error opening, reading, parsing the YAML file, or if the configuration is invalid,
+// it will log a fatal error and terminate the program.
 func LoadConfigFromYAML(filename string) (Config, []Endpoint) {
 	file, err := os.Open(filename)
 	if err != nil {

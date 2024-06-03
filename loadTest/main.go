@@ -16,6 +16,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// StartLoadTest starts a load test with the given configuration, endpoints, and WebSocket connection.
+// It sends requests to the endpoints at the specified rate and duration, and collects metrics for analysis.
+// The load test uses a TimescaleDB client to store the metrics data.
+//
+// Parameters:
+//   - config: The configuration for the load test.
+//   - endpoints: The list of endpoints to send requests to.
+//   - conn: The WebSocket connection for real-time logging.
+//
+// Returns: None.
 func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	client := &http.Client{}
 	var wg sync.WaitGroup

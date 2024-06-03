@@ -16,6 +16,21 @@ func fullUrl(baseUrl string, endpoint string) string {
 	return baseUrl + endpoint
 }
 
+// SendRequest sends an HTTP request to the specified endpoint using the provided client.
+// It logs the request metrics and response details to the specified metrics object.
+// The function runs asynchronously using the provided wait group.
+// If a websocket connection is provided, it will be used to log the request details.
+//
+// Parameters:
+//   - client: The HTTP client to use for sending the request.
+//   - config: The configuration object containing the base URL and headers.
+//   - endpoint: The endpoint details including the URL, method, and data.
+//   - metrics: The metrics object used for logging request metrics.
+//   - wg: The wait group used for synchronizing the asynchronous execution.
+//   - conn: The websocket connection used for logging request details.
+//
+// Note: The function assumes that the `Metrics` and `Endpoint` types are defined.
+// It also assumes that the `fullUrl` function is defined to construct the full URL.
 func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics *Metrics, wg *sync.WaitGroup, conn *websocket.Conn) {
 	defer wg.Done()
 	start := time.Now()

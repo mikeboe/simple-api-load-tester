@@ -22,6 +22,13 @@ type LoadTestConfig struct {
 	Endpoints []loadTest.Endpoint `json:"endpoints"`
 }
 
+// loadTestHandler handles the WebSocket connection for load testing.
+// It upgrades the HTTP connection to a WebSocket connection, extracts the test ID from the URL,
+// and continuously reads JSON messages from the client.
+// The received message is printed for debugging purposes, and the test ID is added to the message's configuration.
+// Then, it sends a response to the client indicating that the load test is starting.
+// Finally, it starts the load test using the received configuration and endpoints, and sends a response to the client
+// indicating that the load test has completed.
 func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

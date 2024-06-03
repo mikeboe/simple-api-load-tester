@@ -10,6 +10,10 @@ import (
 
 var db *sql.DB
 
+// initDB initializes the database connection.
+// It reads the database connection string from the environment variable "DB_STRING",
+// opens a connection to the PostgreSQL database, and pings the database to ensure connectivity.
+// If any error occurs during the process, it logs a fatal error and exits the program.
 func initDB() {
 
 	connStr := os.Getenv("DB_STRING")

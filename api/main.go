@@ -8,6 +8,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// main is the entry point of the application.
+// It loads the environment variables, initializes the router,
+// and starts the server on port 8000.
 func main() {
 	readErr := godotenv.Load()
 	if readErr != nil {

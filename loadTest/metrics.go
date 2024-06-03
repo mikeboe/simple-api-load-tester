@@ -159,6 +159,12 @@ func max(times []time.Duration) time.Duration {
 	return max
 }
 
+// PrintSummary prints a summary of the load test metrics.
+// It takes the actual duration of the test and a WebSocket connection as parameters.
+// The function calculates various metrics such as average response time, success rate, failure rate,
+// minimum and maximum response times, and actual requests per second.
+// It then prints the metrics to the console.
+// Additionally, if a WebSocket connection is provided, it sends the metrics as a report to the client.
 func (m *Metrics) PrintSummary(actualDuration time.Duration, conn *websocket.Conn) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
