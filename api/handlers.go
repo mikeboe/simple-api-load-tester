@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	loadTest "github.com/mikeboe/simple-api-load-tester/loadTest"
+	loadTest "simple-api-load-tester/loadTest"
 
 	"github.com/gorilla/websocket"
 )
@@ -43,7 +43,7 @@ func loadTestHandler(w http.ResponseWriter, r *http.Request) {
 		// run load test
 		loadTest.StartLoadTest(msg.Config, msg.Endpoints, conn)
 
-		response := map[string]string{"status": "Load test started"}
+		response := map[string]string{"status": "Load test completed"}
 		conn.WriteJSON(response)
 	}
 }

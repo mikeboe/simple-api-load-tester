@@ -1,4 +1,4 @@
-package main
+package loadTest
 
 import (
 	"context"
@@ -48,9 +48,7 @@ func NewMetrics(db *pgxpool.Pool, testID uuid.UUID) *Metrics {
 	}
 } */
 
-func (m *Metrics) SendMetrics(testID uuid.UUID, timestamp time.Time, method, url string, responseTime int64, statusCode int, responseMessage string, conn *websocket.Conn) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func SendMetrics(testID uuid.UUID, timestamp time.Time, method, url string, responseTime int64, statusCode int, responseMessage string, conn *websocket.Conn) {
 
 	message := map[string]interface{}{
 		"test_id":          testID,
@@ -59,10 +57,10 @@ func (m *Metrics) SendMetrics(testID uuid.UUID, timestamp time.Time, method, url
 		"url":              url,
 		"response_time_ms": responseTime,
 		"status_code":      statusCode,
-		"response_message": responseMessage,
+		// "response_message": responseMessage,
 	}
 
-	log.Println(message)
+	// log.Println(message)
 	if conn != nil {
 		fmt.Println("Sending metrics to client")
 		err := conn.WriteJSON(message)
@@ -110,7 +108,8 @@ func (m *Metrics) LogRequest(startTime time.Time, duration time.Duration, succes
 
 	// Send metrics to the client
 	if conn != nil {
-		m.SendMetrics(m.TestID, time, endpoint.Method, endpoint.URL, duration.Milliseconds(), statusCode, responseMessage, conn)
+
+		SendMetrics(m.TestID, time, endpoint.Method, endpoint.URL, duration.Milliseconds(), statusCode, responseMessage, conn)
 	}
 }
 

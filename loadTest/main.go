@@ -1,4 +1,4 @@
-package main
+package loadTest
 
 import (
 	"context"
@@ -16,17 +16,6 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 )
-
-func logMessage(conn *websocket.Conn, message string) {
-	// log.Println(message)
-	fmt.Println(message)
-	if conn != nil {
-		err := conn.WriteJSON(message)
-		if err != nil {
-			log.Printf("Error writing to WebSocket: %v\n", err)
-		}
-	}
-}
 
 func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	client := &http.Client{}
@@ -65,7 +54,7 @@ func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 			endpoint = GetRandomEndpoint(endpoints)
 		}
 		go SendRequest(client, config, endpoint, metrics, &wg, conn)
-		logMessage(conn, fmt.Sprintf("Sending request %d to %s", i+1, endpoint.URL))
+		// logMessage(conn, fmt.Sprintf("Sending request %d to %s", i+1, endpoint.URL))
 		<-ticker.C
 	}
 
@@ -75,20 +64,20 @@ func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	metrics.PrintSummary(actualDuration)
 }
 
-func ScheduleLoadTest(config Config, endpoints []Endpoint) {
+func ScheduleLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	// Get the cron schedule from the environment variable
 	cronSchedule := os.Getenv("SCHEDULE")
 	if cronSchedule == "" {
 		fmt.Println("SCHEDULE environment variable not set, running now...\n")
-		StartLoadTest(config, endpoints)
+		StartLoadTest(config, endpoints, conn)
 	}
 
 	// Schedule the load test based on the environment variable
 	_, err := scheduler.Cron(cronSchedule).Do(func() {
 		fmt.Println("Starting scheduled load test...")
-		StartLoadTest(config, endpoints)
+		StartLoadTest(config, endpoints, conn)
 	})
 	if err != nil {
 		log.Fatalf("Error scheduling load test: %v", err)
@@ -105,5 +94,5 @@ func main() {
 	}
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
 	config, endpoints := LoadConfigFromYAML("config.yaml")
-	ScheduleLoadTest(config, endpoints)
+	ScheduleLoadTest(config, endpoints, nil)
 }

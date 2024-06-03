@@ -11,7 +11,7 @@ import (
 func main() {
 	readErr := godotenv.Load()
 	if readErr != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 	dbString := os.Getenv("DB_STRING")
 	if dbString == "" {

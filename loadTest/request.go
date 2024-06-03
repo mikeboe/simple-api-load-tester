@@ -1,4 +1,4 @@
-package main
+package loadTest
 
 import (
 	"bytes"
@@ -12,6 +12,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+func fullUrl(baseUrl string, endpoint string) string {
+	return baseUrl + endpoint
+}
+
 func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics *Metrics, wg *sync.WaitGroup, conn *websocket.Conn) {
 	defer wg.Done()
 	start := time.Now()
@@ -22,18 +26,18 @@ func SendRequest(client *http.Client, config Config, endpoint Endpoint, metrics 
 		data, err := json.Marshal(endpoint.Data)
 		if err != nil {
 			fmt.Printf("Error marshaling data: %s - Endpoint: %s\n", err.Error(), endpoint.URL)
-			metrics.LogRequest(start, 0, false, endpoint, 0, err.Error())
+			metrics.LogRequest(start, 0, false, endpoint, 0, err.Error(), conn)
 			return
 		}
-		req, err = http.NewRequest(endpoint.Method, endpoint.URL, bytes.NewBuffer(data))
+		req, err = http.NewRequest(endpoint.Method, fullUrl(config.BaseUrl, endpoint.URL), bytes.NewBuffer(data))
 		req.Header.Set("Content-Type", "application/json")
 	} else {
-		req, err = http.NewRequest(endpoint.Method, endpoint.URL, nil)
+		req, err = http.NewRequest(endpoint.Method, fullUrl(config.BaseUrl, endpoint.URL), nil)
 	}
 
 	if err != nil {
 		fmt.Printf("Error creating request: %s - Endpoint: %s\n", err.Error(), endpoint.URL)
-		metrics.LogRequest(start, 0, false, endpoint, 0, err.Error())
+		metrics.LogRequest(start, 0, false, endpoint, 0, err.Error(), conn)
 		return
 	}
 

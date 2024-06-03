@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13
+    image: timescale/timescaledb:latest-pg15
     environment:
-      POSTGRES_USER: youruser
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -14,28 +14,25 @@ services:
       - "5432:5432"
 
   api:
-    build: ./api
+    image: api
+    build: .
     environment:
-      - POSTGRES_USER=youruser
-      - POSTGRES_PASSWORD=yourpassword
-      - POSTGRES_DB=yourdb
-      - DB_HOST=db
-      - DB_PORT=5432
+      - DB_STRING=postgres://postgres:password@db:5432/postgres
     depends_on:
       - db
     ports:
       - "8000:8000"
 
-  loadTest:
-    build: ./loadTest
-    depends_on:
-      - api
-    environment:
-      - CRON_SCHEDULE="* * * * *" # Example cron schedule, replace with your desired schedule
-      - DB_HOST=db
-      - DB_PORT=5432
-      - API_HOST=api
-      - API_PORT=8000
+  # loadTest:
+  #   build: ./loadTest
+  #   depends_on:
+  #     - api
+  #   environment:
+  #     - CRON_SCHEDULE="* * * * *" # Example cron schedule, replace with your desired schedule
+  #     - DB_HOST=db
+  #     - DB_PORT=5432
+  #     - API_HOST=api
+  #     - API_PORT=8000
 
   frontend:
     build: ./frontend

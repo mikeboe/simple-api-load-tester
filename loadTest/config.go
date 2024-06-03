@@ -1,4 +1,4 @@
-package main
+package loadTest
 
 import (
 	"fmt"
@@ -21,6 +21,7 @@ type Config struct {
 	TimescaleDBConn            string            `yaml:"timescaleDBConn"`
 	Headers                    map[string]string `yaml:"headers"`
 	UseStatisticalDistribution bool              `yaml:"useStatisticalDistribution"`
+	BaseUrl                    string            `yaml:"baseURL"`
 }
 
 type ConfigFile struct {
