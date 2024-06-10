@@ -1,4 +1,4 @@
-import { Card, Headline3, Paragraph, ValueDisplay } from "@rcktsftwr/components";
+import { Card, Headline3, ValueDisplay } from "@rcktsftwr/components";
 
 type ResultsTableProps = {
   data: {
@@ -26,9 +26,9 @@ type ResultsTableProps = {
 const ResultsTable = ({ data }: ResultsTableProps) => {
   return (
     <Card headline="Results">
-      <>{!data.success_rate && <Headline3>No data available</Headline3>}</>
+      <>{data.total_requests === 0 && <Headline3>No data available</Headline3>}</>
       <>
-        {data.success_rate && (
+        {data.total_requests > 0 && (
             <>
             <div>
                 <ValueDisplay label="Total Requests" value={data.total_requests} />

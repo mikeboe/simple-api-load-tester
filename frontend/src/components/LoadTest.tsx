@@ -4,7 +4,6 @@ import { PrimaryButton, SecondaryButton } from "./ui/Buttons";
 import qs from "qs";
 import { useNavigate, useParams } from "react-router-dom";
 import Chart from "./chart/Chart";
-import { Card } from "@rcktsftwr/components";
 import ResultsTable from "./results/ResultsTable";
 
 const socketUrl = "ws://localhost:8000/";
@@ -53,7 +52,31 @@ const LoadTest = () => {
     { endpoint: string; counter: number; duration: number }[]
   >([]);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<{
+    actual_requests_per_sec: number;
+    average_response_time: number;
+    endpoint_stats: { [key: string]: { Count: number; TotalTime: number } };
+    failed_requests: number;
+    failure_rate: number;
+    max_response_time: number;
+    min_response_time: number;
+    total_requests: number;
+    requests_per_second: { [key: string]: number };
+    success_rate: number;
+    successful_requests: number;
+  }>({
+    actual_requests_per_sec: 0,
+    average_response_time: 0,
+    endpoint_stats: {},
+    failed_requests: 0,
+    failure_rate: 0,
+    max_response_time: 0,
+    min_response_time: 0,
+    total_requests: 0,
+    requests_per_second: {},
+    success_rate: 0,
+    successful_requests: 0,
+  });
 
   const parseBool = (value: string): boolean => {
     if (value === "true") {
