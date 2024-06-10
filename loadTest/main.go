@@ -33,13 +33,18 @@ func StartLoadTest(config Config, endpoints []Endpoint, conn *websocket.Conn) {
 	// Initialize TimescaleDB client
 	dbString := os.Getenv("DB_STRING")
 	if dbString == "" {
-		log.Fatalf("DB_STRING environment variable not set.")
+		log.Printf("DB_STRING environment variable not set.")
 	}
-	dbpool, err := pgxpool.Connect(context.Background(), dbString)
-	if err != nil {
-		log.Fatalf("Unable to connect to TimescaleDB: %v", err)
+
+	var dbpool *pgxpool.Pool
+	if dbString != "" {
+		var err error
+		dbpool, err = pgxpool.Connect(context.Background(), dbString)
+		if err != nil {
+			log.Printf("Unable to connect to TimescaleDB: %v", err)
+		}
+		defer dbpool.Close()
 	}
-	defer dbpool.Close()
 
 	// Generate a unique test ID for this run
 

@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import { useNavigate } from 'react-router-dom';
 import { PrimaryButton } from './ui/Buttons';
 import qs from 'qs';
+import { PageHeader } from '@rcktsftwr/components';
 
 const CreateLoadTest = observer(() => {
 
@@ -28,11 +29,7 @@ const CreateLoadTest = observer(() => {
 
     return (
         <>
-            <header>
-                <div className="mx-auto max-w-7xl my-10">
-                    <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Create API Load Test</h1>
-                </div>
-            </header>
+            <PageHeader headline='Create Load Test 🚀' />
 
             <Form submitLabel='Start Test' cancelLabel='Clear' onSubmit={createLoadTest}>
                 <FormSection headline="Config">

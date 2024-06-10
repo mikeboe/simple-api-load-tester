@@ -12,7 +12,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   api:
     image: ghcr.io/mikeboe/simple-api-load-tester-api:latest
@@ -20,7 +20,7 @@ services:
     build:
       dockerfile: Dockerfile.api
     environment:
-      - DB_STRING=postgres://postgres:password@db:5432/postgres
+      - DB_STRING=postgres://postgres:password@192.168.188.20:5433/postgres
     depends_on:
       - db
     ports:
@@ -43,7 +43,7 @@ services:
     build:
       dockerfile: Dockerfile.frontend
     ports:
-      - "3000:80"
+      - "4000:80"
     depends_on:
       - api
 
