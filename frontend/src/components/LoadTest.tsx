@@ -1,55 +1,85 @@
 import { useState, useEffect } from "react";
 import useWebSocket from "react-use-websocket";
-import { PrimaryButton, SecondaryButton } from "./ui/Buttons";
-import qs from "qs";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Chart from "./chart/Chart";
 import ResultsTable from "./results/ResultsTable";
+import rocketapi from "../api/config";
+import toast from "react-hot-toast";
+import {
+  Card,
+  classNames,
+  PageHeader,
+  ValueDisplay,
+} from "@rcktsftwr/components";
+import EndpointsTable from "./endpoints/EndpointsTable";
 
 const socketUrl = "ws://localhost:8000/";
 
 const LoadTest = () => {
   const params = useParams();
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  type URLProps = {
-    config: {
-      BaseUrl: string;
-      DurationInSeconds: string;
-      RequestsPerSecond: string;
-      UseStatisicalDistribution: string;
-    };
-    headers: {
-      key: string;
-      value: string;
-    }[];
-    endpoints: {
-      Method: string;
-      URL: string;
-    }[];
+  // const [test, setTest] = useState<any>({});
+  const [testConfig, setTestConfig] = useState<any>({});
+  const [testEndpoints, setTestEndpoints] = useState<any[]>([]);
+  const [testHeaders, setTestHeaders] = useState<any[]>([]);
+
+  const getTestById = async () => {
+    await rocketapi
+      .from("tests")
+      .byId(params.id ?? "")
+      .get()
+      .then((response: any) => {
+        setTestConfig({
+          base_url: response.base_url,
+          duration: response.duration,
+          rps: response.rps,
+          use_statistical_distribution: response.use_statistical_distribution,
+        });
+        setTestEndpoints(JSON.parse(response.endpoints));
+        setMessages(
+          JSON.parse(response.endpoints).map((endpoint: any) => ({
+            endpoint: endpoint.URL,
+            counter: 0,
+            duration: 0,
+            method: endpoint.Method,
+          }))
+        );
+        setTestHeaders(JSON.parse(response.headers));
+        console.log(response);
+      });
   };
 
-  const { config, headers, endpoints }: URLProps = qs.parse(
-    window.location.search,
-    { ignoreQueryPrefix: true }
-  ) as URLProps;
+  useEffect(() => {
+    getTestById();
+  }, []);
 
   // headers as an object
-  const headersObject: { [key: string]: string } | undefined = headers?.reduce(
-    (acc, header) => {
+  const headersObject: { [key: string]: string } | undefined =
+    testHeaders?.reduce((acc, header) => {
       acc[header.key] = header.value;
       return acc;
-    },
-    {} as { [key: string]: string }
-  );
+    }, {} as { [key: string]: string });
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(
     socketUrl + params.id
   );
 
+  useEffect(() => {
+    console.log("Ready state: ", readyState);
+    if (readyState === 1) {
+      console.log("Connection established");
+      toast.success("Connection established");
+    }
+    if (readyState === 3) {
+      console.log("Connection closed");
+      toast.error("Connection closed");
+    }
+  }, [readyState]);
+
   const [messages, setMessages] = useState<
-    { endpoint: string; counter: number; duration: number }[]
+    { endpoint: string; counter: number; duration: number; status?: number; method?: string }[]
   >([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [results, setResults] = useState<{
@@ -89,15 +119,19 @@ const LoadTest = () => {
     console.log("Starting test");
     const message = {
       config: {
-        BaseUrl: config.BaseUrl,
-        DurationInSeconds: parseInt(config.DurationInSeconds),
-        RequestsPerSecond: parseInt(config.RequestsPerSecond),
-        UseStatisicalDistribution: parseBool(config.UseStatisicalDistribution),
+        BaseUrl: testConfig.base_url,
+        DurationInSeconds: parseInt(testConfig.duration),
+        RequestsPerSecond: parseInt(testConfig.rps),
+        UseStatisicalDistribution: parseBool(
+          testConfig.use_statistical_distribution
+        ),
         headers: headersObject,
       },
-      endpoints,
+      endpoints: testEndpoints,
     };
 
+    toast.success("Test started");
+    console.log("Sending message", message);
     sendMessage(JSON.stringify(message));
   };
 
@@ -106,7 +140,7 @@ const LoadTest = () => {
   };
 
   const updateChartData = (data: any[]) => {
-    const requestsToDisplay = parseInt(config.DurationInSeconds) * 3;
+    const requestsToDisplay = parseInt(testConfig.duration) * 3;
 
     if (chartData.length > requestsToDisplay) {
       const updatedChartData = chartData.slice(1);
@@ -128,8 +162,9 @@ const LoadTest = () => {
   }, [lastMessage]);
 
   const handleMessage = (message: any) => {
-    if(message.metrics) {
-        setResults(message.metrics);
+    if (message.metrics) {
+      setResults(message.metrics);
+      toast.success("Test completed");
     }
 
     if (!message.url) {
@@ -144,6 +179,7 @@ const LoadTest = () => {
           endpoint: message.url,
           counter: 1,
           duration: message.response_time_ms,
+          status: message.status_code,
         },
       ]);
     } else {
@@ -151,9 +187,11 @@ const LoadTest = () => {
         endpoint: string;
         counter: number;
         duration: number;
+        status?: number;
       }[] = [...messages];
 
       updatedMessages[index].counter += 1;
+      updatedMessages[index].status = message.status_code;
       updatedMessages[index].duration = calcAverage(
         updatedMessages[index].counter,
         updatedMessages[index].duration,
@@ -167,44 +205,52 @@ const LoadTest = () => {
 
   return (
     <>
-      <header>
-        <div className="mx-auto max-w-7xl my-10">
-          <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">
-            Run API Load Test
-          </h1>
-          <p className="text-lg text-gray-600">Test ID: {params.id}</p>
+      <PageHeader
+        headline="Run API Load Test"
+        subline={`Test ID: ${params.id}`}
+        backButtonLink="/"
+        backButtonText="back"
+        saveButton={true}
+        saveButtonText="Start Test"
+        saveButtonOnClick={handleClickSendMessage}
+      />
+      {/* <p className="text-lg text-gray-600">Test ID: {params.id}</p> */}
+
+      <Card headline="Test cofiguration">
+        {testConfig && (
+          <div className="flex">
+            {/* <ValueDisplay label="Test name" value={} /> */}
+            <ValueDisplay label="Base URL" value={testConfig.base_url} />
+            <ValueDisplay label="Duration" value={testConfig.duration} />
+            <ValueDisplay label="RPS" value={testConfig.rps} />
+            <ValueDisplay
+              label="Use statistical distribution"
+              value={testConfig.use_statistical_distribution ? "Yes" : "No"}
+            />
+          </div>
+        )}
+      </Card>
+
+      <Card headline="Endpoints">
+        {testEndpoints && (
+          <div>
+            <EndpointsTable data={messages} />
+          </div>
+        )}
+      </Card>
+      {
+        <div
+          className={classNames(
+            results.total_requests > 0
+              ? "grid grid-cols-1 md:grid-cols-2"
+              : "grid grid-cols-1",
+            "space-x-2"
+          )}
+        >
+          <Chart data={chartData} />
+          {results.total_requests > 0 ? <ResultsTable data={results} /> : null}
         </div>
-      </header>
-      <div>
-        <SecondaryButton label="Back" onClick={() => navigate("/")} />
-      </div>
-      <p className="dark:text-white">Ready state: {readyState}</p>
-      <PrimaryButton label="Start Test" onClick={handleClickSendMessage} />
-      <div className="dark:text-white">
-        <table>
-          <thead>
-            <tr>
-              <th>Endpoint</th>
-              <th>Counter</th>
-              <th>Reponse Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {messages.map((message, index) => (
-              <tr key={index}>
-                <td>{message.endpoint}</td>
-                <td>{message.counter}</td>
-                <td>{message.duration} ms</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-            <div className="grid grid-cols-2 space-x-2">
-            <Chart data={chartData} />
-            <ResultsTable data={results} />
-            </div>
-      
+      }
     </>
   );
 };

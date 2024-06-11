@@ -26,6 +26,21 @@ services:
     ports:
       - "8000:8000"
 
+  rest-api:
+    image: ghcr.io/mikeboe/simple-api-load-tester-rest:latest
+    container_name: rest-api
+    build:
+      dockerfile: Dockerfile.rest-api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:password@192.168.188.20:5433/postgres
+      NODE_ENV: development
+      PORT: 3000
+
   # loadTest:
   #   build: ./loadTest
   #   depends_on:
@@ -46,6 +61,7 @@ services:
       - "4000:80"
     depends_on:
       - api
+      - rest-api
 
 volumes:
   pgdata:

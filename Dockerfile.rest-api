@@ -1,0 +1,16 @@
+# Step 1: Build the application
+FROM node:20-alpine AS builder
+
+WORKDIR /base
+COPY ./rest-api/package.json .
+COPY ./rest-api/package-lock.json .
+
+RUN npm i
+
+COPY ./rest-api .
+
+RUN npm run build 
+
+EXPOSE 3000
+
+ENTRYPOINT ["sh","start.sh"]
