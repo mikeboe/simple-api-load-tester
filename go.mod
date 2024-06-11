@@ -1,6 +1,6 @@
 module simple-api-load-tester
 
-go 1.21
+go 1.22.1
 
 require (
 	github.com/go-co-op/gocron v1.37.0
