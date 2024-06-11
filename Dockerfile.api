@@ -20,7 +20,7 @@ WORKDIR /
 COPY --from=builder /app/main .
 
 # Ensure the binary has execution permissions
-RUN chmod +x main
+# RUN chmod +x main
 
 USER nonroot:nonroot
 
