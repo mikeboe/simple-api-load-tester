@@ -20,7 +20,7 @@ services:
     build:
       dockerfile: Dockerfile.api
     environment:
-      - DB_STRING=postgres://postgres:password@192.168.188.20:5433/postgres
+      - DB_STRING=postgres://postgres:password@db:5433/postgres
     depends_on:
       - db
     ports:
@@ -37,7 +37,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://postgres:password@192.168.188.20:5433/postgres
+      DATABASE_URL: postgres://postgres:password@db:5433/postgres
       NODE_ENV: development
       PORT: 3000
 
