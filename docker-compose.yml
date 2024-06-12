@@ -12,7 +12,7 @@ services:
     depends_on:
       - db
       - api
-      - rest-api
+      - restapi
       - frontend
   db:
     image: timescale/timescaledb:latest-pg15
