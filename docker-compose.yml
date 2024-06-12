@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  proxy: 
+    image: nginx:latest
+    container_name: proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/proxy.conf:/etc/nginx/conf.d/default.conf
+    restart: always
+    depends_on:
+      - db
+      - api
+      - rest-api
+      - frontend
   db:
     image: timescale/timescaledb:latest-pg15
     container_name: db
@@ -65,3 +78,6 @@ services:
 
 volumes:
   pgdata:
+
+networks:
+  default:
