@@ -74,7 +74,7 @@ services:
       - "4000:80"
     depends_on:
       - api
-      - rest-api
+      - restapi
 
 volumes:
   pgdata:
