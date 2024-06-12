@@ -12,7 +12,7 @@ services:
     depends_on:
       - db
       - api
-      - restapi
+      - rest-api
       - frontend
   db:
     image: timescale/timescaledb:latest-pg15
@@ -39,9 +39,9 @@ services:
     ports:
       - "8000:8000"
 
-  restapi:
+  rest-api:
     image: ghcr.io/mikeboe/simple-api-load-tester-rest:latest
-    container_name: restapi
+    container_name: rest-api
     build:
       dockerfile: Dockerfile.rest-api
     restart: always
@@ -74,10 +74,7 @@ services:
       - "4000:80"
     depends_on:
       - api
-      - restapi
+      - rest-api
 
 volumes:
   pgdata:
-
-networks:
-  default:
